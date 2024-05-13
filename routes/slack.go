@@ -5,7 +5,6 @@ import (
 	"consulate/models"
 	"consulate/services"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -51,7 +50,6 @@ func SlackInteraction(c *gin.Context) {
 				parts := strings.Split(action.SelectedOption.Value, "|")
 				id, _ := strconv.Atoi(parts[1])
 				services.GormDb().Find(&enquiry, id)
-				fmt.Println(parts)
 				if parts[0] == "contact_details" {
 					if err := helpers.ShowContactDetailsView(payload.TriggerID, payload.User.ID, enquiry); err != nil {
 						panic(err)
