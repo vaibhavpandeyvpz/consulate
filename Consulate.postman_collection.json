@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "1bfa868e-565d-45f6-8b67-ebf27624ead5",
+		"_postman_id": "2df452f2-52a4-4e26-89c7-7894811dc654",
 		"name": "Consulate",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "16000625"
@@ -25,7 +25,7 @@
 							"type": "text"
 						},
 						{
-							"key": "",
+							"key": "phone",
 							"value": "+919876543210",
 							"type": "text"
 						},
