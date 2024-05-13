@@ -10,7 +10,7 @@ Record collected enquiries, place and record outbound calls, store follow-ups et
 ## Usage
 
 Firstly, go to [api.slack.com](https://api.slack.com/), create a new app using provided manifest (see [slack.dist.yml](slack.dist.yml)) and install it on a [Slack](https://slack.com/intl/en-in/) workspace.
-Once done, get the **signing secret** as well as **bot access token** to update in `config.yml` file
+Once done, get the **signing secret** as well as **bot access token** to update in `config.yml` file.
 
 Grab a binary from the latest release for your platform from [this page](https://github.com/vaibhavpandeyvpz/consulate/releases/latest).
 In the same folder as binary, create a `config.yml` file from the sample in the repository using below command:
