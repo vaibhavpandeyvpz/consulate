@@ -1,0 +1,20 @@
+database:
+  path: enquiries.sqlite
+
+exotel:
+  domain: api.exotel.com
+  account_sid:
+  api_key:
+  api_token:
+  called_id:
+  status_callback: "https://<ngrok_domain>/exotel/callback"
+
+recipients:
+- USER_ID_1
+- USER_ID_2
+
+slack:
+  bot_token:
+  channels:
+    enquiries:
+  signing_secret:

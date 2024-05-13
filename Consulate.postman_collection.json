@@ -1,0 +1,82 @@
+{
+	"info": {
+		"_postman_id": "1bfa868e-565d-45f6-8b67-ebf27624ead5",
+		"name": "Consulate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16000625"
+	},
+	"item": [
+		{
+			"name": "Submit enquiry",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "John F. Doe",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "john.f@doefamily.com",
+							"type": "text"
+						},
+						{
+							"key": "",
+							"value": "+919876543210",
+							"type": "text"
+						},
+						{
+							"key": "message",
+							"value": "I want to know about that ugly software on your website.",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "{{BaseUrl}}/enquiries",
+					"host": [
+						"{{BaseUrl}}"
+					],
+					"path": [
+						"enquiries"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BaseUrl",
+			"value": "http://127.0.0.1:8080",
+			"type": "string"
+		}
+	]
+}

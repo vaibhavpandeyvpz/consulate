@@ -1,0 +1,7 @@
+/.env
+/*.sqlite
+/config.yml
+/ngrok.yml
+/slack.yml
+/consulate
+/tmp
