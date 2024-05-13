@@ -5,9 +5,11 @@ import (
 	"consulate/models"
 	"consulate/services"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func SlackInteraction(c *gin.Context) {
@@ -30,17 +32,30 @@ func SlackInteraction(c *gin.Context) {
 
 	if payload.Type == "block_actions" {
 		for _, action := range payload.Actions {
-			if action.Value == "" {
+			var enquiry models.Enquiry
+			if action.ID != "enquiry_overflow" {
+				id, _ := strconv.Atoi(action.Value)
+				services.GormDb().Find(&enquiry, id)
+				if action.Value == "" {
+					continue
+				}
+			} else if action.SelectedOption.Value == "" {
 				continue
 			}
-
-			var enquiry models.Enquiry
-			id, _ := strconv.Atoi(action.Value)
-			services.GormDb().Find(&enquiry, id)
 
 			if action.ID == "call_now" {
 				if err := helpers.PlacePhoneCall(payload.User.ID, enquiry); err != nil {
 					panic(err)
+				}
+			} else if action.ID == "enquiry_overflow" {
+				parts := strings.Split(action.SelectedOption.Value, "|")
+				id, _ := strconv.Atoi(parts[1])
+				services.GormDb().Find(&enquiry, id)
+				fmt.Println(parts)
+				if parts[0] == "contact_details" {
+					if err := helpers.ShowContactDetailsView(payload.TriggerID, payload.User.ID, enquiry); err != nil {
+						panic(err)
+					}
 				}
 			} else if action.ID == "follow_up_enquiry" {
 				if err := helpers.ShowFollowUpView(payload.TriggerID, enquiry); err != nil {

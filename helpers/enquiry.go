@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func ForwardEnquiry(user string, enquiry models.Enquiry, values models.SlackViewStateValues) (err error) {
+func ForwardEnquiry(userId string, enquiry models.Enquiry, values models.SlackViewStateValues) (err error) {
 	sc := services.SlackClient()
 	_ = sc.AddReaction("dart", slack.ItemRef{
 		Channel:   services.GetConfig().Slack.Channels.Enquiries,
@@ -28,7 +28,7 @@ func ForwardEnquiry(user string, enquiry models.Enquiry, values models.SlackView
 	_, _, err = sc.PostMessage(
 		services.GetConfig().Slack.Channels.Enquiries,
 		slack.MsgOptionText(
-			fmt.Sprintf("<@%s> has *forwarded* this enquiry to <@%s>", user, recipient), false,
+			fmt.Sprintf("<@%s> has *forwarded* this enquiry to <@%s>", userId, recipient), false,
 		),
 		slack.MsgOptionTS(enquiry.SlackMessageTs),
 	)
@@ -63,7 +63,7 @@ func ForwardEnquiry(user string, enquiry models.Enquiry, values models.SlackView
 			slack.NewSectionBlock(
 				slack.NewTextBlockObject(
 					"mrkdwn",
-					fmt.Sprintf("<@%s> has forwarded you <%s|this enquiry>. Please find the direct contact details below:", user, permalink),
+					fmt.Sprintf("<@%s> has forwarded you <%s|this enquiry>. Please find the direct contact details mentioned below.", userId, permalink),
 					false,
 					false,
 				),
@@ -120,7 +120,18 @@ func HandleNewEnquiry(enquiry models.Enquiry, ip string) (err error) {
 				false,
 			),
 			fields,
-			nil,
+			slack.NewAccessory(
+				&slack.OverflowBlockElement{
+					Type:     "overflow",
+					ActionID: "enquiry_overflow",
+					Options: []*slack.OptionBlockObject{
+						{
+							Text:  slack.NewTextBlockObject("plain_text", "See contact details", false, false),
+							Value: fmt.Sprintf("contact_details|%s", strconv.Itoa(int(enquiry.ID))),
+						},
+					},
+				},
+			),
 		),
 	}
 
@@ -230,9 +241,9 @@ func LoadForwardToRecipientOptions(q string) (options []slack.OptionBlockObject,
 	return
 }
 
-func PlacePhoneCall(user string, enquiry models.Enquiry) (err error) {
+func PlacePhoneCall(userId string, enquiry models.Enquiry) (err error) {
 	sc := services.SlackClient()
-	info, err := sc.GetUserInfo(user)
+	info, err := sc.GetUserInfo(userId)
 	if err != nil {
 		return
 	}
@@ -240,7 +251,7 @@ func PlacePhoneCall(user string, enquiry models.Enquiry) (err error) {
 	if info.Profile.Phone == "" {
 		_, err = sc.PostEphemeral(
 			services.GetConfig().Slack.Channels.Enquiries,
-			user,
+			userId,
 			slack.MsgOptionText("Please add a phone number to your Slack profile to use this feature.", false),
 		)
 
@@ -258,7 +269,7 @@ func PlacePhoneCall(user string, enquiry models.Enquiry) (err error) {
 	_, _, err = sc.PostMessage(
 		services.GetConfig().Slack.Channels.Enquiries,
 		slack.MsgOptionText(
-			fmt.Sprintf("<@%s> has *called* this enquiry.", user), false,
+			fmt.Sprintf("<@%s> has *called* this enquiry.", userId), false,
 		),
 		slack.MsgOptionTS(enquiry.SlackMessageTs),
 	)
@@ -266,12 +277,12 @@ func PlacePhoneCall(user string, enquiry models.Enquiry) (err error) {
 		return
 	}
 
-	err = services.CallWithExotel(user, enquiry, info.Profile.Phone, enquiry.Phone)
+	err = services.CallWithExotel(userId, enquiry, info.Profile.Phone, enquiry.Phone)
 
 	return
 }
 
-func RecordFollowUp(user string, enquiry models.Enquiry, values models.SlackViewStateValues) (err error) {
+func RecordFollowUp(userId string, enquiry models.Enquiry, values models.SlackViewStateValues) (err error) {
 	sc := services.SlackClient()
 	_ = sc.AddReaction("parrot", slack.ItemRef{
 		Channel:   services.GetConfig().Slack.Channels.Enquiries,
@@ -291,10 +302,62 @@ func RecordFollowUp(user string, enquiry models.Enquiry, values models.SlackView
 	_, _, err = sc.PostMessage(
 		services.GetConfig().Slack.Channels.Enquiries,
 		slack.MsgOptionText(
-			fmt.Sprintf("<@%s> has *recorded a follow up* on this enquiry i.e., %s", user, notes), false,
+			fmt.Sprintf("<@%s> has *recorded a follow up* on this enquiry i.e., %s", userId, notes), false,
 		),
 		slack.MsgOptionTS(enquiry.SlackMessageTs),
 	)
+
+	return
+}
+
+func ShowContactDetailsView(triggerId string, userId string, enquiry models.Enquiry) (err error) {
+	var blocks []slack.Block
+
+	if slices.Contains(services.GetConfig().Recipients, userId) {
+		var fields []*slack.TextBlockObject
+		if len(enquiry.Email) > 0 {
+			fields = append(fields, &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: fmt.Sprintf("*Email address*\n<mailto:%s|%s>", enquiry.Email, enquiry.Email),
+			})
+		}
+
+		fields = append(fields, &slack.TextBlockObject{
+			Type: "mrkdwn",
+			Text: fmt.Sprintf("*Phone number*\n<tel:%s|%s>", enquiry.Phone, enquiry.Phone),
+		})
+
+		blocks = append(blocks, slack.NewSectionBlock(
+			slack.NewTextBlockObject(
+				"plain_text",
+				"Please find direct contact details of this enquiry mentioned below.",
+				false,
+				false,
+			),
+			fields,
+			nil,
+		))
+	} else {
+		blocks = append(blocks, slack.NewSectionBlock(
+			slack.NewTextBlockObject(
+				"plain_text",
+				"You do not have access to direct contact details for this enquiry.",
+				false,
+				false,
+			),
+			nil,
+			nil,
+		))
+	}
+
+	sc := services.SlackClient()
+	_, err = sc.OpenView(triggerId, slack.ModalViewRequest{
+		Blocks: slack.Blocks{
+			BlockSet: blocks,
+		},
+		Title: slack.NewTextBlockObject("plain_text", "Contact details", false, false),
+		Type:  "modal",
+	})
 
 	return
 }
@@ -403,7 +466,7 @@ func SendCallRecording(call models.ExotelCall) (err error) {
 	return
 }
 
-func TrashEnquiry(user string, enquiry models.Enquiry) (err error) {
+func TrashEnquiry(userId string, enquiry models.Enquiry) (err error) {
 	sc := services.SlackClient()
 	_ = sc.AddReaction("x", slack.ItemRef{
 		Channel:   services.GetConfig().Slack.Channels.Enquiries,
@@ -416,7 +479,7 @@ func TrashEnquiry(user string, enquiry models.Enquiry) (err error) {
 	_, _, err = sc.PostMessage(
 		services.GetConfig().Slack.Channels.Enquiries,
 		slack.MsgOptionText(
-			fmt.Sprintf("<@%s> has *trashed* this enquiry.", user), false,
+			fmt.Sprintf("<@%s> has *trashed* this enquiry.", userId), false,
 		),
 		slack.MsgOptionTS(enquiry.SlackMessageTs),
 	)

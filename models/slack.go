@@ -1,20 +1,23 @@
 package models
 
 type SlackAction struct {
-	ID    string `json:"action_id" required:"true"`
-	Value string `json:"value" required:"true"`
+	ID             string `json:"action_id"`
+	SelectedOption struct {
+		Value string `json:"value"`
+	} `json:"selected_option"`
+	Value string `json:"value"`
 }
 
 type SlackChannel struct {
-	ID   string `json:"id" required:"true"`
-	Name string `json:"name" required:"true"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type SlackInteractionPayload struct {
-	Type      string        `json:"type" required:"true"`
-	TriggerID string        `json:"trigger_id" required:"true"`
-	Team      SlackTeam     `json:"team" required:"true"`
-	User      SlackUser     `json:"user" required:"true"`
+	Type      string        `json:"type"`
+	TriggerID string        `json:"trigger_id"`
+	Team      SlackTeam     `json:"team"`
+	User      SlackUser     `json:"user"`
 	Channel   SlackChannel  `json:"channel"`
 	Message   SlackMessage  `json:"message"`
 	Actions   []SlackAction `json:"actions"`
@@ -22,33 +25,33 @@ type SlackInteractionPayload struct {
 }
 
 type SlackPayload struct {
-	Payload string `form:"payload" required:"true"`
+	Payload string `form:"payload"`
 }
 
 type SlackMessage struct {
-	Team string `json:"team" required:"true"`
-	User string `json:"user" required:"true"`
-	Ts   string `json:"ts" required:"true"`
+	Team string `json:"team"`
+	User string `json:"user"`
+	Ts   string `json:"ts"`
 }
 
 type SlackOptionsPayload struct {
-	Type     string    `json:"type" required:"true"`
-	Team     SlackTeam `json:"team" required:"true"`
-	User     SlackUser `json:"user" required:"true"`
-	BlockID  string    `json:"block_id" required:"true"`
-	ActionID string    `json:"action_id" required:"true"`
-	Value    string    `json:"value" required:"true"`
+	Type     string    `json:"type"`
+	Team     SlackTeam `json:"team"`
+	User     SlackUser `json:"user"`
+	BlockID  string    `json:"block_id"`
+	ActionID string    `json:"action_id"`
+	Value    string    `json:"value"`
 	View     SlackView `json:"view"`
 }
 
 type SlackTeam struct {
-	ID     string `json:"id" required:"true"`
-	Domain string `json:"domain" required:"true"`
+	ID     string `json:"id"`
+	Domain string `json:"domain"`
 }
 
 type SlackUser struct {
-	ID   string `json:"id" required:"true"`
-	Name string `json:"name" required:"true"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type SlackView struct {
