@@ -9,9 +9,6 @@ Record collected enquiries, place and record outbound calls, store follow-ups et
 
 ## Usage
 
-Firstly, go to [api.slack.com](https://api.slack.com/), create a new app using provided manifest (see [slack.dist.yml](slack.dist.yml)) and install it on a [Slack](https://slack.com/intl/en-in/) workspace.
-Once done, get the **signing secret** as well as **bot access token** to update in `config.yml` file
-
 Grab a binary from the latest release for your platform from [this page](https://github.com/vaibhavpandeyvpz/consulate/releases/latest).
 In the same folder as binary, create a `config.yml` file from the sample in the repository using below command:
 
@@ -19,18 +16,21 @@ In the same folder as binary, create a `config.yml` file from the sample in the 
 wget -O config.yml https://raw.githubusercontent.com/vaibhavpandeyvpz/consulate/main/config.dist.yml
 ```
 
+Then go to [api.slack.com](https://api.slack.com/), create a new app using provided manifest (see [slack.dist.yml](slack.dist.yml)) and install it on a [Slack](https://slack.com/intl/en-in/) workspace.
+Once done, make note of the **signing secret** as well as **bot access token** shown in [Slack](https://slack.com/intl/en-in/).
+
 Update your [Slack](https://slack.com/intl/en-in/) and [Exotel](https://exotel.com/) credentials in `config.yml` file and start the app server using below command:
 
 ```shell
 ./consulate -config=config.yml
 ```
 
-Since [Slack](https://slack.com/intl/en-in/) needs to communicate to your app for certain functionality, its recommended to run this on a server and install an [SSL](https://letsencrypt.org/) certificate.
+Since [Slack](https://slack.com/intl/en-in/) needs to communicate with your app for certain functionality, it's recommended to run this on a server and install an [SSL](https://letsencrypt.org/) certificate.
 
 ## Development
 
 Make sure you have [Docker](https://www.docker.com/) installed on your workstation.
-For the IDE, I highly recommend using [GoLand](https://www.jetbrains.com/go/) i.e., my go to choice for [Go](https://go.dev) development.
+For the IDE, I highly recommend using [GoLand](https://www.jetbrains.com/go/) i.e., my go-to choice for [Go](https://go.dev) development.
 
 Download or clone the project using [Git](https://git-scm.com/) and then run following commands in project folder:
 
