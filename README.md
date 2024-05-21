@@ -75,4 +75,54 @@ To build the [Docker](https://www.docker.com/) container locally, use below comm
 
 ```shell
 docker build -t consulate .
+# or 
+docker build -t ghcr.io/vaibhavpandeyvpz/consulate .
+```
+
+Container once pushed, can be pulled and run directly as below:
+
+```shell
+docker run -it --rm \
+  -p "8080:8080" \
+  -v ./config.yml:/consulate_config.yml \
+  ghcr.io/vaibhavpandeyvpz/consulate:latest \
+  consulate --config=/consulate_config.yml
+```
+
+You can also use below [Nginx](https://nginx.org/en/) vhost config to expose the server to internet easily:
+
+```text
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name example.com;
+
+    location ~ ^/consulate/ {
+        rewrite ^/consulate/(.*) /$1 break;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://127.0.0.1:8080;
+    }
+}
+```
+
+If not running via [Docker](https://www.docker.com/), you can use below [Supervisor](https://supervisord.org/) configuration to run the server in daemon mode:
+
+```ini
+[program:consulate]
+autorestart=true
+command=/home/ubuntu/consulate --config=/home/ubuntu/consulate_config.yml
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+redirect_stderr=true
+stdout_logfile=/home/ubuntu/consulate.log
+stopwaitsecs=3600
 ```
